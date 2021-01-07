@@ -1,0 +1,14 @@
+#!/bin/bash
+
+function luasPersegi() {
+	echo $(($1 * $2))
+}
+
+echo "Masukkan panjang persegi :"
+read panjang
+
+echo "Masukkan lebar persegi :"
+read lebar
+
+echo "Luas persegi :"
+echo $(luasPersegi $panjang $lebar)

@@ -1,0 +1,14 @@
+#!/bin/bash
+
+read -p "Input : " jumlahSemester
+totalIP=0
+iterasi=0
+
+while [ $iterasi -lt $jumlahSemester ]; do
+	read IPS[$iterasi]
+	let totalIP=$((totalIP + IPS[$iterasi]))
+	let iterasi=$((iterasi + 1))
+done
+
+echo "IPS mhs = $totalIP / $jumlahSemester"
+echo "IPK mhs = $((totalIP / jumlahSemester))"

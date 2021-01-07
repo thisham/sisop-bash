@@ -1,0 +1,70 @@
+#!/bin/bash
+
+function cekKabisatMasehi() {
+	if [ $(($1 % 400)) -eq 0 ]; then
+		echo 1
+	elif [ $(($1 % 100)) -eq 0 ]; then
+		echo 0
+	elif [ $(($1 % 4)) -eq 0 ]; then
+		echo 1
+	else
+		echo 0
+	fi
+}
+
+hariMasehiKabisat=(31 29 31 30 31 30 31 31 30 31 30 31)
+hariMasehiBiasa=(31 28 31 30 31 30 31 31 30 31 30 31)
+
+function validasiTanggalMasehi() {
+	if [ $(cekKabisatMasehi $1) -eq 1 ]; then
+		if [ $3 -lt 1 ]; then
+			echo 0
+		elif [ $3 -gt ${hariMasehiKabisat[$(($2 - 1))]} ]; then
+			echo 0
+		else
+			echo 1
+		fi
+	else
+		if [ $3 -lt 1 ]; then
+			echo 0
+		elif [ $3 -gt ${hariMasehiBiasa[$(($2 - 1))]} ]; then
+			echo 0
+		else
+			echo 1
+		fi
+	fi
+}
+
+function validasiMasehi() {
+	if [ $2 -lt 1 ]; then
+		echo 0
+	elif [ $2 -gt 12 ]; then
+		echo 0
+	else 
+		echo $(validasiTanggalMasehi $1 $2 $3)
+	fi
+}
+
+function mainMasehi() {
+	echo "Masukkan tahun, bulan, tanggal dalam bentuk angka"
+	read -p "Angka tahun : " tahun
+	read -p "Angka bulan : " bulan
+	read -p "Tanggal     : " tanggal
+	echo $(validasiMasehi $tahun $bulan $tanggal)
+}
+
+function main() {
+	echo "Selamat datang, pilih menu: "
+	echo "[1] Masehi ke Hijriah"
+	echo "[2] Hijriah ke Masehi"
+	echo ""
+	read -p "Pilihan Anda : " pilih
+	echo "------------------------------------------"
+	case $pilih in
+		1) mainMasehi;;
+		2) echo "Hijriah";;
+		*) echo "Unknown";;
+	esac
+}
+
+main
