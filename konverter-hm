@@ -12,6 +12,30 @@ function cekKabisatMasehi() {
 	fi
 }
 
+tahunKabisatHijriah=(2 5 7 10 13 15 18 21 24 26 29)
+
+function cekKabisatHijriah() {
+	if [[ " $1 " =~ " ${tahunKabisatHijriah[@]} " ]]; then
+		echo 355
+	else
+		echo 354
+	fi
+}
+
+hari=("Sabtu" "Minggu" "Senin" "Selasa" "Rabu" "Kamis" "Jumat")
+
+function namaHari() {
+	local angkaHari=$(($1 % 7))
+	echo ${hari[$angkaHari]}
+}
+
+pasaran=("Legi" "Pahing" "Pon" "Wage" "Kliwon")
+
+function namaPasaran() {
+	local angkaPasaran=$(($1 % 5))
+	echo ${pasaran[$angkaPasaran]}
+}
+
 hariMasehiKabisat=(31 29 31 30 31 30 31 31 30 31 30 31)
 hariMasehiBiasa=(31 28 31 30 31 30 31 31 30 31 30 31)
 
@@ -72,24 +96,45 @@ function hariGregorian() {
 	echo $(($siklus + $sisaSiklus + $bulan + $3))
 }
 
-hari=("Sabtu" "Minggu" "Senin" "Selasa" "Rabu" "Kamis" "Jumat")
+hariBulanHijriah=(29 30 29 30 29 30 29 30 29 30 29 30)
+namaBulanHijriah=("Muharram" "Safar" "Rabiul Awal" "Rabiul Akhir" "Jumadil Awal" "Jumadil Akhir" "Rajab" "Syaban" "Ramadan" "Syawal" "Zulkaidah" "Zulhijjah")
 
-function namaHari() {
-	local angkaHari=$(($(hariGregorian $1 $2 $3) % 7))
-	echo ${hari[$angkaHari]}
+function bulanKalenderMH() {
+	local sisaHari=$2
+	local idx=0
+	while [ $sisaHari -gt ${hariBulanHijriah[$idx]} ]; do
+		let sisaHari=$(($sisaHari - ${hariBulanHijriah[$idx]}))
+		((idx++))
+	done
+	echo "$sisaHari ${namaBulanHijriah[$idx]} $1"
 }
 
-pasaran=("Legi" "Pahing" "Pon" "Wage" "Kliwon")
-
-function namaPasaran() {
-	local angkaPasaran=$(($(hariGregorian $1 $2 $3) % 5))
-	echo ${pasaran[$angkaPasaran]}
+function kalenderMH() {
+	local tahunHijriah=$(($1 * 30))
+	local sisaHari=$2
+	local idx=1
+	local hariSetahun=0
+	while [ $sisaHari -gt $(cekKabisatHijriah $idx) ]; do
+		let hariSetahun=$(cekKabisatHijriah $idx)
+		let sisaHari=$(($sisaHari - $hariSetahun))
+		((tahunHijriah++))
+		((idx++))
+	done
+	echo $(bulanKalenderMH $(($tahunHijriah + 1)) $sisaHari)
 }
 
+function intiMH() {
+	local hariHijriah=$(($1 - 227029))
+	local sisaDaur=$(($hariHijriah % 10631))
+	local daurHijriah=$(($hariHijriah - $sisaDaur))
+	let daurHijriah=$(($daurHijriah / 10631))
+	echo $(kalenderMH $daurHijriah $sisaDaur)
+}
 
 function konversiDariMasehi() {
 	if [ $(validasiMasehi $1 $2 $3) -eq 1 ]; then
-		echo "$(namaHari $1 $2 $3) $(namaPasaran $1 $2 $3)"
+		local angkaGregorian=$(hariGregorian $1 $2 $3)
+		echo "$(namaHari $angkaGregorian) $(namaPasaran $angkaGregorian), $(intiMH $angkaGregorian) Hijriah"
 	else
 		echo "Error: Penanggalan Fiktif"
 	fi
