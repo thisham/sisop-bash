@@ -45,12 +45,63 @@ function validasiMasehi() {
 	fi
 }
 
+function hariBulanMasehi() {
+	local idx=0
+	local hari=0
+	if [ $(cekKabisatMasehi $1) -eq 1 ]; then
+		until [ $idx -eq $2 ]; do
+			let hari=$(($hari + ${hariMasehiKabisat[$idx]}))
+			((idx++))
+		done
+	else
+		until [ $idx -eq $2 ]; do
+			let hari=$(($hari + ${hariMasehiBiasa[$idx]}))
+			((idx++))
+		done
+	fi
+}
+
+function hariGregorian() {
+	local tahunTam=$(($1 - 1))
+	local sisaSiklus=$(($tahunTam % 4))
+	local siklus=$(($tahunTam - $sisaSiklus))
+	let siklus=$(($siklus / 4))
+	let siklus=$(($siklus * 1461))
+	let sisaSiklus=$(($sisaSiklus * 365))
+	local bulan=$(hariBulanMasehi $1 $(($2 - 1)))
+	echo $(($siklus + $sisaSiklus + $bulan + $3))
+}
+
+hari=("Sabtu" "Minggu" "Senin" "Selasa" "Rabu" "Kamis" "Jumat")
+
+function namaHari() {
+	local angkaHari=$(($(hariGregorian $1 $2 $3) % 7))
+	echo ${hari[$angkaHari]}
+}
+
+pasaran=("Legi" "Pahing" "Pon" "Wage" "Kliwon")
+
+function namaPasaran() {
+	local angkaPasaran=$(($(hariGregorian $1 $2 $3) % 5))
+	echo ${pasaran[$angkaPasaran]}
+}
+
+
+function konversiDariMasehi() {
+	if [ $(validasiMasehi $1 $2 $3) -eq 1 ]; then
+		echo "$(namaHari $1 $2 $3) $(namaPasaran $1 $2 $3)"
+	else
+		echo "Error: Penanggalan Fiktif"
+	fi
+}
+
 function mainMasehi() {
 	echo "Masukkan tahun, bulan, tanggal dalam bentuk angka"
 	read -p "Angka tahun : " tahun
 	read -p "Angka bulan : " bulan
 	read -p "Tanggal     : " tanggal
-	echo $(validasiMasehi $tahun $bulan $tanggal)
+	echo ""
+	echo "Hasil Konversi : $(konversiDariMasehi $tahun $bulan $tanggal)"
 }
 
 function main() {
