@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -x
 
 function cekKabisatMasehi() {
 	if [ $(($1 % 400)) -eq 0 ]; then
@@ -35,6 +35,8 @@ function namaPasaran() {
 	local angkaPasaran=$(($1 % 5))
 	echo ${pasaran[$angkaPasaran]}
 }
+
+# --------------------Masehi ke Hijriah---------------------------
 
 hariMasehiKabisat=(31 29 31 30 31 30 31 31 30 31 30 31)
 hariMasehiBiasa=(31 28 31 30 31 30 31 31 30 31 30 31)
@@ -149,6 +151,75 @@ function mainMasehi() {
 	echo "Hasil Konversi : $(konversiDariMasehi $tahun $bulan $tanggal)"
 }
 
+# --------------------Hijriah ke Masehi---------------------------
+
+function validasiTanggalHijriah() {
+	if [ $2 -lt 1 ]; then
+		echo 0
+	elif [ $2 -gt 30 ]; then
+		echo 0
+	else 
+		echo 1
+	fi
+}
+
+function validasiHijriah() {
+	if [ $2 -lt 1 ]; then
+		echo 0
+	elif [ $2 -gt 12 ]; then
+		echo 0
+	else 
+		echo $(validasiTanggalHijriah $1 $2 $3)
+	fi
+}
+
+function hariDalamBulanHijriah() {
+	local idx=0
+	local hari=0
+	until [ $idx -eq $1 ]; do
+		let hari=$(($hari + ${hariBulanHijriah[$idx]}))
+		((idx++))
+	done
+	echo $hari
+}
+
+function hariGregorianDariHijriah() {
+	local tahunTam=$(($1 - 1))
+	local sisaSiklus=$(($tahunTam % 30))
+	local siklus=$(($tahunTam - $sisaSiklus))
+	let siklus=$(($siklus / 30))
+	let siklus=$(($siklus * 10631))
+	local hariSisaSiklus=0
+	local idx=0
+	while [ $sisaSiklus -gt 0 ]; do
+		let hariSisaSiklus=$(($(cekKabisatHijriah $idx) + $hariSisaSiklus))
+		((sisaSiklus--))
+		((idx++))
+	done
+	local bulan=$(hariDalamBulanHijriah $(($2 - 1)))
+	echo $(($siklus + $sisaSiklus + $bulan + $3))
+}
+
+function konversiDariHijriah() {
+	if [ $(validasiHijriah $1 $2 $3) -eq 1 ]; then
+		# local angkaGregorian=$(hariGregorian $1 $2 $3)
+		# echo "$(namaHari $angkaGregorian) $(namaPasaran $angkaGregorian), $(intiMH $angkaGregorian) Hijriah"
+		local angkaGregorian=$(($(hariGregorianDariHijriah $1 $2 $3) + 227029))
+		echo "$(namaHari $angkaGregorian) $(namaPasaran $angkaGregorian)"
+	else
+		echo "Error: Penanggalan Fiktif"
+	fi
+}
+
+function mainHijriah() {
+	echo "Masukkan tahun, bulan, tanggal dalam bentuk angka"
+	read -p "Angka tahun : " tahun
+	read -p "Angka bulan : " bulan
+	read -p "Tanggal     : " tanggal
+	echo ""
+	echo "Hasil Konversi : $(konversiDariHijriah $tahun $bulan $tanggal)"
+}
+
 function main() {
 	echo "Selamat datang, pilih menu: "
 	echo "[1] Masehi ke Hijriah"
@@ -158,7 +229,7 @@ function main() {
 	echo "------------------------------------------"
 	case $pilih in
 		1) mainMasehi;;
-		2) echo "Hijriah";;
+		2) mainHijriah;;
 		*) echo "Unknown";;
 	esac
 }
