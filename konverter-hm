@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 
 function cekKabisatMasehi() {
 	if [ $(($1 % 400)) -eq 0 ]; then
@@ -197,15 +197,45 @@ function hariGregorianDariHijriah() {
 		((idx++))
 	done
 	local bulan=$(hariDalamBulanHijriah $(($2 - 1)))
-	echo $(($siklus + $sisaSiklus + $bulan + $3))
+	echo $(($siklus + $hariSisaSiklus + $bulan + $3))
+}
+
+namaBulanMasehi=("Januari" "Februari" "Maret" "April" "Mei" "Juni" "Juli" "Agustus" "September" "Oktober" "November" "Desember")
+
+function kalenderHM() {
+	local idx=0
+	local sisaHari=$2
+	if [ $(cekKabisatMasehi $1) -eq 1 ]; then
+		while [ $sisaHari -gt ${hariMasehiKabisat[$idx]} ]; do
+			let sisaHari=$(($sisaHari - ${hariMasehiKabisat[$idx]}))
+			((idx++))
+		done
+	else
+		while [ $sisaHari -gt ${hariMasehiBiasa[$idx]} ]; do
+			let sisaHari=$(($sisaHari - ${hariMasehiBiasa[$idx]}))
+			((idx++))
+		done
+	fi
+	echo "$sisaHari ${namaBulanMasehi[$idx]} $1"
+}
+
+function intiHM() {
+	local sisaDaur=$(($1 % 1461))
+	local daur=$(($1 - $sisaDaur))
+	let daur=$(($daur / 1461))
+	let daur=$(($daur * 4))
+	local tahun=$(($sisaDaur % 365))
+	let tahun=$(($sisaDaur - $tahun))
+	let tahun=$(($tahun * 365))
+	let tahun=$(($daur + $tahun + 1))
+	let sisaDaur=$(($sisaDaur % 365))
+	echo $(kalenderHM $tahun $sisaDaur)
 }
 
 function konversiDariHijriah() {
 	if [ $(validasiHijriah $1 $2 $3) -eq 1 ]; then
-		# local angkaGregorian=$(hariGregorian $1 $2 $3)
-		# echo "$(namaHari $angkaGregorian) $(namaPasaran $angkaGregorian), $(intiMH $angkaGregorian) Hijriah"
 		local angkaGregorian=$(($(hariGregorianDariHijriah $1 $2 $3) + 227029))
-		echo "$(namaHari $angkaGregorian) $(namaPasaran $angkaGregorian)"
+		echo "$(namaHari $angkaGregorian) $(namaPasaran $angkaGregorian), $(intiHM $angkaGregorian) Masehi"
 	else
 		echo "Error: Penanggalan Fiktif"
 	fi
